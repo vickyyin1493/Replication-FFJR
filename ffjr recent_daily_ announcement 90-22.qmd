@@ -5,11 +5,8 @@ format: html
 bibliography: book.bib
 ---
 
-We have included a bibliography entry in the header information here.
-The file for this can be found on [the `far_templates` page](https://github.com/iangow/far_templates/blob/main/README.md).
-
-All code from the book chapter has been included below.
-Feel free to delete any code that you don't need or use.
+This version of FFJR replication is our "initial data steps" on Financial Accounting Research project. 
+We used the codes in the textbook and changed the frequency from monthly to daily data and used announcement dates instead of effective dates for stock splits. We restricted the window to be from 1990 - 2022 for our analysis. 
 
 ```{r}
 #| include: false
