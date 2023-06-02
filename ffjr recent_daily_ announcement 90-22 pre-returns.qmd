@@ -115,9 +115,9 @@ split_sample <-
   split_return_data %>%
   filter(between(day_rel_ex, -90, 90)) %>%
   group_by(permno, dclrdt) %>%
+  filter(between (ret, 0.13,0.130)) %>%
   summarize(n_obs = n(), .groups = "drop") %>%
   filter(n_obs == 181L) %>% 
-	filter(between (ret, 0.13,0.14)) %>%
   select(permno, dclrdt)
 
 split_returns <-
