@@ -336,6 +336,11 @@ table2_w_divs %>%
   ggplot(aes(x = month_gap, y = U)) +
   geom_point()
 ```
+```{r}
+table2_w_divs %>% 
+  filter(month_gap == 0, !is.na(up_div)) %>%
+  count(up_div)
+  ```
 
 ### Discussion questions and exercises
 
