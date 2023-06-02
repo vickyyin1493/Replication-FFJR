@@ -117,6 +117,7 @@ split_sample <-
   group_by(permno, dclrdt) %>%
   summarize(n_obs = n(), .groups = "drop") %>%
   filter(n_obs == 181L) %>% 
+	filter(between (ret, 0.13,0.14)) %>%
   select(permno, dclrdt)
 
 split_returns <-
