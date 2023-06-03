@@ -5,6 +5,9 @@ format: html
 bibliography: book.bib
 ---
 
+We used monthly data on announcement dates from 1990 to 2022 to analyse whether splits are followed by dividends more often than not.
+We found that in 1199 (75.3%) cases, it is true while in 393 (24.7%) cases it is false.
+
 ```{r}
 #| include: false
 library(DBI)
