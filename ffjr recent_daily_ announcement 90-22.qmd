@@ -325,6 +325,7 @@ table2_w_divs %>%
   ggplot(aes(x = day_gap, y = U)) +
   geom_point()
 ```
+- We were unsure why we had such a small sample when using daily data, we used monthly data separately to analyse this claim in another file. 
 
 #evidence for supporting the claim made in FFJR on "large fraction of stock splits have been followed closely by dividend increases"
 ```{r}
