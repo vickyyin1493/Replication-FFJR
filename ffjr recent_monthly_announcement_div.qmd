@@ -1,15 +1,9 @@
----
-title: "Template for 'FFJR'"
-author: Your name
+ ---
+title: "Splits followed by dividends?"
+author: Jade & Vicky
 format: html
 bibliography: book.bib
 ---
-
-We have included a bibliography entry in the header information here.
-The file for this can be found on [the `far_templates` page](https://github.com/iangow/far_templates/blob/main/README.md).
-
-All code from the book chapter has been included below.
-Feel free to delete any code that you don't need or use.
 
 ```{r}
 #| include: false
@@ -20,45 +14,6 @@ library(tidyr)       # For nest and unnest
 library(purrr)       # For map, map2
 library(ggplot2)
 ```
-
-## Stock splits
-
-### Discussion questions
-
-1. Consider the following alternative theories.
-
-- **Theory A**: Firms like to keep their stock price within certain bounds.
-When the stock price rises above a certain threshold, a firm may initiate a split, announcing it several weeks in advance of its effective date.
-Firms do not use splits to signal private information about firm prospects.
-- **Theory B**: Firms use splits to signal private information about firm prospects.
-A firm will announce a split several weeks in advance of its effective date.
-- **Theory C**: Capital market participants don't fully adjust for the effect of splits, tending to anchor on the pre-split price to some degree.
-Firms do not use splits to signal private information about firm prospects.
-
-Produce a set of indicative plots (e.g., drawn by hand) for the predicted behaviour of cumulative abnormal returns for assuming that the split is announced in month $-2$.
-What impact would variation in the announcement dates relative to the splits effective date have on the plots?
-
-![Split theories](split_theories.png){#fig-split}
-
-See @fig-split for some depictions of theories about splits.
-
-## Dividend policy
-
-### Discussion questions
-
-1. Does the research design include the use of a control group? 
-If so, how? 
-What alternative methods could have been used to introduce a control group?
-
-2. @Fama:1969wc [p. 9] state "the most important empirical results of this study are summarized in Tables 2 and 3 and Figures 2 and 3."
-What does Table 3 tell us? (Hint: Read p.11.) 
-Do you find the presentation of Table 3 to be effective?
-
-3. Consider Table 2. 
-Is it more or less important than Table 3? 
-What is the relationship between Table 2 and Figures 2 and 3?
-
-4. What statistical tests are used to test the hypotheses of the paper?
 
 ## Replication of FFJR
 
@@ -343,40 +298,3 @@ table2_w_divs %>%
   filter(month_gap == 0, !is.na(up_div)) %>%
   count(up_div)
 ```
-
-### Discussion questions and exercises
-
-1. "In the past a large fraction of stock splits have been followed closely by dividend increases---and increases greater than those experienced at the same time by other securities in the market."
-What evidence to support this claim (if any) is provided by FFJR?
-Do we see evidence consistent with this in the data underlying our replication above?
-
-2. Consider the following alternative theories.
-
-- **Theory $A'$**: Firms like to keep their stock price within certain bounds.
-When the stock price rises above a certain threshold, a firm may initiate a split, announcing it several weeks in advance of its effective date.
-Firms do not use splits to signal private information about firm prospects.
-*Pre-split stock prices may be driven by information that suggests an imminent increase in dividends.*
-- **Theory $B'$**: Firms use splits to signal private information about firm prospects.
-A firm will announce a split several weeks in advance of its effective date.
-*Firms may also use dividend changes to signal private information about firm prospects.*
-- **Theory $B^{''}$**: *Firms use splits to signal private information about future dividend increases, which in turn signal private information about firm prospects.*
-A firm will announce a split several weeks in advance of its effective date.
-
-Suggest tests that could distinguish which of the three hypotheses above best explains observed phenomena.
-Which theory best fits the theory proposed by FFJR?
-How would the theory need to be modified to comport better with the theory proposed by FFJR?
-
-3. On p. 17 of @Fama:1969wc, it is argued that "our data suggest that once the information effects of associated dividends are properly considered, a split *per se* has no net effect on common stock returns."
-Is it clear what meaning the words "per se" have in this sentence?
-Does FFJR provide persuasive evidence in support of this claim?
-Describe how you might test this claim using the richer data available today.
-What data would you use beyond that used in FFJR?
-
-4. How the figures produced above compare with their equivalents in FFJR?
-What might account for any differences?
-
-5. In the analysis above we used `vwretd` as the market index.
-Modify the code above to instead use `ewretd`.
-Do you observe any changes in the resulting figures?
-Which do you believe is the better market index for these plots?
-Why?
