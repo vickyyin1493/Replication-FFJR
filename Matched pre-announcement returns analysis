@@ -8,6 +8,8 @@ bibliography: book.bib
 This version of FFJR replication is our "initial data steps" on Financial Accounting Research project. 
 We used the codes in the textbook and changed the frequency from monthly to daily data and used announcement 
 dates instead of effective dates for stock splits. We restricted the window to be from 1990 - 2022 for our analysis. 
+We tried to choose a return%, find a firm that has the return% before split and another firm with this return% that did not have splits. Analyse their return patterns in the month of the split.
+
 
 ```{r}
 #| include: false
@@ -32,7 +34,7 @@ msi <- tbl(pg, "msi")
 stocknames <- tbl(pg, "stocknames")
 dsedist <- tbl(pg, "dsedist")
 ```
-
+#Split firm
 ```{r}
 #| include: false
 splits <-
@@ -83,7 +85,7 @@ nyse_splits <-
   collect()
 ```
 
-We construct `nyse_msf`, which is essentially `crsp.msf` restricted to NYSE stocks and months with non-missing returns, and with the added variable `month_index`.
+We construct `nyse_msf`, which is essentially `crsp.msf` restricted to NYSE stocks and days with non-missing returns, and with the added variable `day_index`.
 
 ```{r nyse_msf}
 #| include: false
@@ -98,7 +100,7 @@ nyse_msf <-
 ```
 
 The following code merges data on splits from `nyse_splits` with data on returns from `nyse_msf`.
-We create a variable (`month_rel_ex`) that measures the number of months between the split and the return.
+We create a variable (`day_rel_ex`) that measures the number of days between the split and the return.
 
 ```{r}
 #| include: false
@@ -115,9 +117,9 @@ split_sample <-
   split_return_data %>%
   filter(between(day_rel_ex, -90, 90)) %>%
   group_by(permno, dclrdt) %>%
-  filter(between (ret, 0.13,0.130)) %>%
+  filter(between (ret, 0.13, 0.13)) %>%
   summarize(n_obs = n(), .groups = "drop") %>%
-  filter(n_obs == 181L) %>% 
+  filter(n_obs == 1L) %>%
   select(permno, dclrdt)
 
 split_returns <-
@@ -193,144 +195,165 @@ table2_data %>%
   ggplot(aes(x = day_gap, y = all_U)) +
   geom_point()
 ```
-#aggregate splits against lagged market returns 
-```{r}
-last_split <- max(split_sample$dclrdt)
 
-mkt_indx <-
-  msi %>%
-  filter(date <= !!last_split) %>%
-  collect() %>%
-  arrange(date) %>%
-  mutate(cumret = cumprod(1 + coalesce(ewretx,0)) * 100) %>%
-  filter(day(date) == 30) %>%
-  mutate(month = month(date)) %>%
-  select(month, cumret)
-
-num_splits <-
-  split_sample %>%
-  mutate(month = month(dclrdt)) %>%
-  group_by(month) %>%
-  summarize(n_splits = n())
-
-mkt_indx %>%
-  left_join(num_splits, by = "month") %>%
-  mutate(n_splits = coalesce(n_splits, 0)) %>%
-  arrange(month) %>%
-  mutate(ret = cumret/lag(cumret) - 1,
-         lag_ret = lag(ret)) %>%
-  filter(!is.na(lag_ret)) %>%
-  ggplot(aes(y = n_splits, x = lag_ret)) +
-  geom_point()
-```
-
-### Data on dividends
-
+#Non-split firm
 ```{r}
 #| include: false
-div_day <-
+non_splits <-
   dsedist %>%
-  filter(substr(as.character(distcd), 1L, 1L) == "1") %>%
-  mutate(day = as.Date(date_trunc('day', dclrdt))) %>%
-  group_by(permno, day) %>%
-  summarize(divamt = sum(divamt, na.rm = TRUE), .groups = "drop")
+  filter(dclrdt >= "1990-01-01", dclrdt <= "2022-12-31",
+         distcd %in% c(5523L, 5533L),
+         facshr >= 0.25) %>%
+  mutate(split = FALSE) %>%
+  select(permno, split, dclrdt, facshr) 
 ```
 
 
-```{r nyse_divs_raw}
+```{r}
 #| include: false
-nyse_divs_raw <-
-  msf %>%
+nyse_stocks <-
+  stocknames %>%
+  filter(exchcd == 1,
+         substr(as.character(shrcd), 1L, 1L) == "1") %>%
+  select(permno, namedt, nameenddt) 
+```
+
+```{r}
+#| include: false
+nyse_non_splits_raw <-
+  non_splits %>%
   inner_join(nyse_stocks, by = "permno") %>%
-  filter(between(date, namedt, nameenddt)) %>%
-  mutate(day = as.Date(date_trunc('day', date))) %>%
-  select(permno, date, day, cfacshr) %>%
-  left_join(div_day, by = c("permno", "day")) %>%
-  mutate(divamt = coalesce(divamt/cfacshr, 0)) %>%
-  select(permno, day, divamt)
-```
+  filter(dclrdt >= namedt, dclrdt <= nameenddt) 
+```  
 
-```{r nyse_divs}
+```{r}
 #| include: false
-nyse_divs <-
-  nyse_divs_raw %>%
-  group_by(permno) %>%
+day_indexes <-
+  msi %>%
+  mutate(day = as.Date(date_trunc('day', date))) %>%
   window_order(day) %>%
-  window_frame(from = -89, to = 0) %>%
-  mutate(div_trailing = sum(divamt, na.rm = TRUE),
-         day_trailing = sum(1, na.rm = TRUE)) %>%
-  window_frame(from = 1, to = 90) %>%
-  mutate(div_forward = sum(divamt, na.rm = TRUE),
-         day_forward = sum(1, na.rm = TRUE)) %>%
-  filter(day_trailing == 90, day_forward == 90) %>%
-  ungroup() %>%
-  select(permno, day, div_trailing, div_forward) %>%
+  mutate(day_index = row_number()) %>%
+  select(date, day, day_index)
+```
+  
+```{r nyse_non_splits}
+#| include: false
+nyse_non_splits <-
+  nyse_non_splits_raw %>%
+  mutate(day = as.Date(date_trunc('day', dclrdt))) %>%
+  inner_join(day_indexes, by = "day") %>%
+  rename(ex_day_index = day_index) %>%
+  select(-namedt, -nameenddt, -date) %>%
   collect()
 ```
 
-```{r split_firm_dividends}
+We construct `nyse_msf`, which is essentially `crsp.msf` restricted to NYSE stocks and days with non-missing returns, and with the added variable `day_index`.
+
+```{r nyse_msf}
 #| include: false
-split_firm_dividends <-
-  nyse_splits %>%
-  left_join(nyse_divs, by = c("permno", "day")) %>%
-  mutate(div_ratio = if_else(div_trailing > 0, div_forward/div_trailing,
-                             NA_real_)) %>%
-  filter(!is.na(div_ratio)) %>%
-  select(permno, day, dclrdt, div_ratio) 
+nyse_msf <-
+  msf %>%
+  filter(!is.na(ret)) %>%
+  inner_join(nyse_stocks, by = "permno") %>%
+  filter(between(date, namedt, nameenddt)) %>%
+  inner_join(day_indexes, by = "date") %>%
+  select(permno, day_index, date, ret) %>%
+  collect()
+```
+
+The following code merges data on non_splits from `nyse_non_splits` with data on returns from `nyse_msf`.
+We create a variable (`day_rel_ex`) that measures the number of days between the non_split and the return.
+
+```{r}
+#| include: false
+non_split_return_data <-
+  nyse_non_splits %>%
+  left_join(nyse_msf, by = "permno") %>%
+  mutate(day_rel_ex = day_index - ex_day_index) %>%
+  select(permno, dclrdt, date, ret, day_rel_ex)
 ```
 
 ```{r}
 #| include: false
-div_mkt <-
-  nyse_divs %>% 
-  group_by(day) %>% 
-  summarize(div_trailing = mean(div_trailing, na.rm = TRUE),
-            div_forward = mean(div_forward, na.rm = TRUE),
-            .groups = "drop") %>%
-  mutate(mkt_div_ratio = if_else(div_trailing > 0, div_forward/div_trailing,
-                                 NA_real_))
+non_split_sample <-
+  non_split_return_data %>%
+  filter(between(day_rel_ex, -90, 90)) %>%
+  group_by(permno, dclrdt) %>%
+  filter(between (ret, 0.13, 0.13)) %>%
+  summarize(n_obs = n(), .groups = "drop") %>%
+  filter(n_obs == 1L) %>%
+  select(permno, dclrdt)
 
-dividends_file <-
-  split_firm_dividends %>%
-  inner_join(div_mkt, by = "day") %>%
-  select(permno, dclrdt, div_ratio, mkt_div_ratio) %>% 
-  mutate(up_div = div_ratio >= mkt_div_ratio)
+non_split_returns <-
+  non_split_return_data %>%
+  semi_join(non_split_sample, by = c("permno")) 
 ```
 
 ```{r}
 #| include: false
-table2_w_divs <- 
-  table2_data %>%
-  left_join(dividends_file, by = c("permno", "dclrdt"))
+non_split_sample %>% distinct(permno) %>% count()
+non_split_sample %>% count()
 ```
 
-#cumulative average residuals for dividend "increases"
 ```{r}
-table2_w_divs %>%
-  filter(up_div) %>%
+#| include: false
+index_returns <-
+  msi %>%
+  select(date, vwretd, ewretd) %>%
+  collect()
+```
+
+```{r}
+#| include: false
+omit_returns <-
+  non_split_returns %>%
+  mutate(exclude = between(day_rel_ex, -112, 0)) %>%
+  group_by(permno, date) %>%
+  summarize(exclude = any(exclude), .groups = "drop")
+```
+
+```{r}
+#| include: false
+non_split_returns_reg <-
+  non_split_returns %>%
+  inner_join(omit_returns, by = c("permno", "date")) %>%
+  select(permno, date, ret, exclude) %>%
+  distinct() 
+```
+
+```{r}
+#| include: false
+abnormal_returns <-
+  non_split_returns_reg %>%
+  left_join(index_returns, by = "date") %>%
+  mutate(lpr = log(1 + ret),
+         lm = log(1 + vwretd)) %>%
+  select(permno, date, lpr, lm, exclude) %>%
+  nest(data = !permno) %>%
+  mutate(fit = map(data, ~ lm(lpr ~ lm, data = ., subset = !exclude,
+                              na.action = "na.exclude"))) %>%
+  mutate(predicted = map2(fit, data, ~ predict(.x, newdata = .y))) %>%
+  unnest(cols = c(predicted, data)) %>%
+  mutate(resid = lpr - predicted) %>%
+  select(permno, date, resid)
+```
+
+```{r}
+#| include: false
+table2_data <-
+  abnormal_returns %>%
+  inner_join(collect(day_indexes), by = "date") %>%
+  left_join(nyse_non_splits, by = "permno") %>%
+  mutate(day_gap = day_index - ex_day_index) %>%
+  filter(abs(day_gap) <= 90)
+```
+
+```{r}
+table2_data %>%
   group_by(day_gap) %>%
-  summarize(u = mean(resid), .groups = "drop") %>%
+  summarize(all_u = mean(resid), .groups = "drop") %>%
   arrange(day_gap) %>%
-  mutate(U = cumsum(u)) %>%
-  ggplot(aes(x = day_gap, y = U)) +
+  mutate(all_U = cumsum(all_u)) %>%
+  ggplot(aes(x = day_gap, y = all_U)) +
   geom_point()
 ```
-#cumulative average residuals for dividend "decreases"
-```{r}
-table2_w_divs %>%
-  filter(!up_div) %>%
-  group_by(day_gap) %>%
-  summarize(u = mean(resid), .groups = "drop") %>%
-  arrange(day_gap) %>%
-  mutate(U = cumsum(u)) %>%
-  ggplot(aes(x = day_gap, y = U)) +
-  geom_point()
-```
-
-#evidence for supporting the claim made in FFJR on "large fraction of stock splits have been followed closely by dividend increases"
-```{r}
-table2_w_divs %>%
-  filter(day_gap == 0, !is.na(up_div)) %>%
-  count(up_div)
-```
-
