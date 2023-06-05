@@ -273,7 +273,6 @@ table2_w_divs <-
 ```
 
 ```{r}
-#| include: false
 table2_w_divs %>%
   filter(up_div) %>%
   group_by(month_gap) %>%
@@ -285,7 +284,6 @@ table2_w_divs %>%
 ```
 
 ```{r}
-#| include: false
 table2_w_divs %>%
   filter(!up_div) %>%
   group_by(month_gap) %>%
