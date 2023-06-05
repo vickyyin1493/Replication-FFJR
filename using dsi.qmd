@@ -90,8 +90,9 @@ day_indexes %>%
 nyse_splits <-
   nyse_splits_raw %>%
   mutate(day = as.Date(date_trunc('day', dclrdt))) %>%
-  inner_join(day_indexes, by = "day") %>%
-  rename(ex_day_index = day_index) %>% #!!!
+  inner_join(day_indexes, by = "day") %>% 
+#if we use inner_join, missing data but map could work, if we use left_join, no missing data but map does not work.#
+  rename(ex_day_index = day_index) %>% 
   select(-namedt, -nameenddt, -date) %>%
   collect()
 ```
