@@ -55,7 +55,17 @@ day_indexes <-
   mutate(day = date) %>%
   window_order(day) %>%
   mutate(day_index = row_number()) %>%
-  select(date, day, day_index)
+  select(date, day, day_index) %>%
+  collect()
+
+nyse_splits <-
+  nyse_splits_raw %>%
+  get_event_dates(pg, permno = "permno", event_date = "dclrdt") %>%
+  inner_join(nyse_splits_raw, by = join_by(permno, dclrdt)) %>%
+  rename(ex_day_index = start_date) %>%
+  select(permno, ex_day_index, dclrdt, facshr, split, ex_day_index)
+```
+Old code:
 
 nyse_splits <-
   nyse_splits_raw %>%
@@ -64,7 +74,6 @@ nyse_splits <-
   rename(ex_day_index = day_index) %>% 
   select(-namedt, -nameenddt, -date) %>%
   collect()
-```
 
 ```{r}
 nyse_splits %>% count(split)
