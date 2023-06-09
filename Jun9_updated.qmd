@@ -1,4 +1,19 @@
+Introduction
 
+Overall, we attempted to replicate FFJR's study concerning stock splits, returns and dividends (will change wording later). However, we have implemented changes during our replication to utilise more recent data (from 1990 to 2022) and daily data which can be identified as extensions beyond the original FFJR study which used monthly data and the data ranged from 1926 to 1960. At the time, FFJR presented several theories that also provide a key foundation to our analysis and explanation of subsequent results. During our seminar on FFJR, it was divulged that the following theories were proposed and considered a spossible explanations to the graphs protrayed in FFJR. Specifically, the relevant theories initially explored were: 
+
+**Theory A:** Firms like to keep their stock price within certain bounds. When the stock price rises above a certain threshold, a firm may initiate a split, announcing it several weeks in advance of its effective date.
+**Theory B:** Firms use splits to signal private information about firm prospects. A firm will announce a split several weeks in advance of its effective date. 
+
+Where Theory A represents the liquidity hypothesis where firms tend to  (add ref) and Theory B denotes the information signalling hypothesis where firms (add ref). FFJR primarily argues for Theory B within the paper, which aligns more closely with the information signalling hypothesis that firms will reveal information regarding the firm’s positive prospects to the market. However, the graph aligns more closely with Theory A, which denotes the liquidity hypothesis where management utilises stock splits to enhance their stock’s liquidity.  Hence, this shows that the liquidity hypothesis may have been more applicable to the market in 1926-1960. 
+
+Notes to self: 
+Need to properly reference
+Add theories A' and B'' + explain
+
+**Main replication of FFJR**
+
+We begin by loading the required packages that will be used in our code throughout our FFJR replication. 
 ```{r}
 #| include: false
 #| echo: false
@@ -10,7 +25,16 @@ library(purrr)       # For map, map2
 library(ggplot2)
 library(lubridate)
 library(farr)
+```
 
+We connect to the CRSP database which contains prices and returns on all NYSE common stocks which was the stock exchange utilised in FFJR. We load the appropriate tables which contain the relevant announcement dates, splits and unique firm identifiers (permno) required in our subsequent code. Particularly, we utilised data from dsi and dsf, which stand for daily stock index and daily stock file respectively, as we attempt to replicate FFJR by utilising daily data (also disclosed above). 
+
+Notes to self: 
+Explain dsedist
+Create splits variable where we limited the data to the appropriate timeframe we are investigating, identified cases where there were splits 
+Only obtained information pertaining to NYSE stocks by creating the nyse_stocks variable (exchcd == 1 limits to NYSE) 
+Connected info for NYSE stocks to the splits variable via inner_join by the common identifier (mayber) "permno". 
+```{r}
 pg <- dbConnect(RPostgres::Postgres(), bigint = "integer")
 
 rs <- dbExecute(pg, "SET search_path TO crsp")
@@ -39,6 +63,7 @@ nyse_splits_raw <-
   filter(dclrdt >= namedt, dclrdt <= nameenddt) %>%
   collect() 
 ```
+We now create the variable day_indexes which involves information from the daily stock index table... add more 
 
 ```{r}
 #| include: false
