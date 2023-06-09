@@ -1,0 +1,292 @@
+
+```{r}
+#| include: false
+#| echo: false
+library(DBI)
+library(dplyr, warn.conflicts = FALSE)
+library(dbplyr)      # For window_order
+library(tidyr)       # For nest and unnest
+library(purrr)       # For map, map2
+library(ggplot2)
+library(lubridate)
+library(farr)
+
+pg <- dbConnect(RPostgres::Postgres(), bigint = "integer")
+
+rs <- dbExecute(pg, "SET search_path TO crsp")
+dsi <- tbl(pg, "dsi")
+dsf <- tbl(pg, "dsf")
+stocknames <- tbl(pg, "stocknames")
+dsedist <- tbl(pg, "dsedist")
+
+splits <-
+  dsedist %>%
+  filter(dclrdt >= "1990-01-01", dclrdt <= "2022-12-31",
+         distcd %in% c(5523L, 5533L),
+         facshr >= 0.25) %>%
+  mutate(split = TRUE) %>%
+  select(permno, split, dclrdt, facshr) 
+
+nyse_stocks <-
+  stocknames %>%
+  filter(exchcd == 1,
+         substr(as.character(shrcd), 1L, 1L) == "1") %>%
+  select(permno, namedt, nameenddt) 
+
+nyse_splits_raw <-
+  splits %>%
+  inner_join(nyse_stocks, by = "permno") %>%
+  filter(dclrdt >= namedt, dclrdt <= nameenddt) %>%
+  collect() 
+```
+
+```{r}
+#| include: false
+day_indexes <-
+  dsi %>%
+  mutate(day = date) %>%
+  window_order(day) %>%
+  mutate(day_index = row_number()) %>%
+  select(date, day, day_index) %>%
+  collect() 
+
+nyse_splits <-
+  nyse_splits_raw %>%
+  get_event_dates(pg, permno = "permno", event_date = "dclrdt") %>%
+  inner_join(nyse_splits_raw, by = join_by(permno, dclrdt)) %>%
+  select(-namedt, -nameenddt) %>%
+  rename(day = start_date) %>%
+  select(-end_date) %>%
+  inner_join(day_indexes, by = "day") %>%  
+  rename(ex_day_index = day_index) %>% 
+  select(-date) %>%
+  collect()
+```
+
+```{r nyse_dsf}
+#| include: false
+nyse_dsf <-
+  dsf %>%
+  filter(!is.na(ret)) %>%
+  inner_join(nyse_stocks, by = "permno") %>%
+  filter(between(date, namedt, nameenddt)) %>%
+  collect() %>%
+  inner_join(day_indexes, by = "date") %>%
+  select(permno, day_index, date, ret) 
+
+split_return_data <-
+  nyse_splits %>%
+  left_join(nyse_dsf, by = "permno") %>%
+  mutate(day_rel_ex = day_index - ex_day_index) %>%
+  select(permno, dclrdt, date, ret, day_rel_ex) 
+
+split_sample <-
+  split_return_data %>%
+  filter(between(day_rel_ex, -365, 365)) %>%
+  group_by(permno, dclrdt) %>%
+  summarize(n_obs = n(), .groups = "drop") %>% 
+  select(permno, dclrdt)
+
+split_returns <-
+  split_return_data %>%
+  semi_join(split_sample, by = c("permno")) 
+
+split_sample %>% distinct(permno) %>% count()
+split_sample %>% count()
+
+index_returns <-
+  dsi %>%
+  select(date, vwretd, ewretd) %>%
+  collect()
+
+omit_returns <-
+  split_returns %>%
+  mutate(exclude = between(day_rel_ex, -450, 0)) %>%
+  group_by(permno, date) %>%
+  summarize(exclude = any(exclude), .groups = "drop")
+
+split_returns_reg <-
+  split_returns %>%
+  inner_join(omit_returns, by = c("permno", "date")) %>%
+  select(permno, date, ret, exclude) %>%
+  distinct() 
+```
+
+```{r}
+#| include: false
+abnormal_returns <-
+  split_returns_reg %>%
+  left_join(index_returns, by = "date") %>%
+  mutate(lpr = log(1 + ret),
+         lm = log(1 + vwretd)) %>%
+  select(permno, date, lpr, lm, exclude) %>%
+  nest(data = !permno) %>%
+  mutate(fit = map(data, ~ lm(lpr ~ lm, data = ., subset = !exclude,
+                              na.action = "na.exclude"))) %>%
+  mutate(predicted = map2(fit, data, ~ predict(.x, newdata = .y))) %>%
+  unnest(cols = c(predicted, data)) %>%
+  mutate(resid = lpr - predicted) %>%
+  select(permno, date, resid)
+```
+
+```{r}
+table2_data <-
+  abnormal_returns %>%
+  inner_join(collect(day_indexes), by = "date") %>%
+  left_join(nyse_splits, by = "permno") %>%
+  mutate(day_gap = day_index - ex_day_index) %>%
+  filter(abs(day_gap) <= 365)
+
+table2_data %>%
+  group_by(day_gap) %>%
+  summarize(all_u = mean(resid), .groups = "drop") %>%
+  arrange(day_gap) %>%
+  mutate(all_U = cumsum(all_u)) %>%
+  ggplot(aes(x = day_gap, y = all_U)) +
+  geom_point()
+```
+
+```{r}
+#| include: false
+div_days <-
+  dsedist %>%
+  filter(substr(as.character(distcd), 1L, 1L) == "1") %>%
+  mutate(day =  dclrdt) %>%
+  group_by(permno, day) %>%
+  summarize(divamt = sum(divamt, na.rm = TRUE), .groups = "drop")
+
+nyse_divs_raw <-
+  dsf %>%
+  inner_join(nyse_stocks, by = "permno") %>%
+  filter(between(date, namedt, nameenddt)) %>%
+  mutate(day =  date) %>%
+  select(permno, date, day, cfacshr) %>%
+  left_join(div_days, by = c("permno", "day")) %>%
+  mutate(divamt = coalesce(divamt/cfacshr, 0)) %>%
+  select(permno, day, divamt)
+
+nyse_divs <-
+  nyse_divs_raw %>%
+  group_by(permno) %>%
+  window_order(day) %>%
+  window_frame(from = -364, to = 0) %>%
+  mutate(div_trailing = sum(divamt, na.rm = TRUE),
+         days_trailing = sum(1, na.rm = TRUE)) %>%
+  window_frame(from = 1, to = 365) %>%
+  mutate(div_forward = sum(divamt, na.rm = TRUE),
+         days_forward = sum(1, na.rm = TRUE)) %>%
+  filter(days_trailing == 365, days_forward == 365) %>% #!!!
+  ungroup() %>%
+  select(permno, day, div_trailing, div_forward) %>%
+  collect()
+```
+
+```{r}
+#investigate distribution for days_forward
+nyse_divs_raw %>%
+  group_by(permno) %>%
+  window_order(day) %>%
+  window_frame(from = -364, to = 0) %>%
+  mutate(div_trailing = sum(divamt, na.rm = TRUE),
+         days_trailing = sum(1, na.rm = TRUE)) %>%
+  window_frame(from = 1, to = 365) %>%
+  mutate(div_forward = sum(divamt, na.rm = TRUE),
+         days_forward = sum(1, na.rm = TRUE)) %>%
+  ggplot(aes(days_forward)) +
+  geom_histogram() 
+```
+```{r}
+#investigate distribution for days_trailing
+nyse_divs_raw %>%
+  group_by(permno) %>%
+  window_order(day) %>%
+  window_frame(from = -364, to = 0) %>%
+  mutate(div_trailing = sum(divamt, na.rm = TRUE),
+         days_trailing = sum(1, na.rm = TRUE)) %>%
+  window_frame(from = 1, to = 365) %>%
+  mutate(div_forward = sum(divamt, na.rm = TRUE),
+         days_forward = sum(1, na.rm = TRUE)) %>%
+  ggplot(aes(days_trailing)) +
+  geom_histogram()
+```
+
+```{r}
+nyse_divs <-
+  nyse_divs_raw %>%
+  group_by(permno) %>%
+  window_order(day) %>%
+  window_frame(from = -364, to = 0) %>%
+  mutate(div_trailing = sum(divamt, na.rm = TRUE),
+         days_trailing = sum(1, na.rm = TRUE)) %>%
+  window_frame(from = 1, to = 365) %>%
+  mutate(div_forward = sum(divamt, na.rm = TRUE),
+         days_forward = sum(1, na.rm = TRUE)) %>%
+  ungroup() %>%
+  select(permno, day, div_trailing, div_forward) %>%
+  collect()
+```
+
+```{r split_firm_dividends}
+#| include: false
+split_firm_dividends <-
+  nyse_splits %>% #day here is the same as dclrdt
+  full_join(nyse_divs, by = c("permno", "day")) %>% #day here is dividend date
+  mutate(div_ratio = if_else(div_trailing > 0, div_forward/div_trailing,
+                             NA_real_)) %>%
+  filter(!is.na(div_ratio)) %>%
+  select(permno, day, div_ratio) 
+```
+
+```{r}
+#| include: false
+div_mkt <- #day here is dividend date
+  nyse_divs %>% 
+  group_by(day) %>% 
+  summarize(div_trailing = mean(div_trailing, na.rm = TRUE),
+            div_forward = mean(div_forward, na.rm = TRUE),
+            .groups = "drop") %>%
+  mutate(mkt_div_ratio = if_else(div_trailing > 0, div_forward/div_trailing,
+                                 NA_real_))
+
+dividends_file <-
+  split_firm_dividends %>% #day here is the same as dclrdt
+  inner_join(div_mkt, by = "day") %>%  #day here is dividend date
+  select(permno, day, div_ratio, mkt_div_ratio) %>% 
+  mutate(up_div = div_ratio >= mkt_div_ratio)
+```
+
+```{r}
+#| include: false
+table2_w_divs <- 
+  table2_data %>%
+  rename(day = day.x) %>%
+  left_join(dividends_file, by = c("permno", "day"))
+```
+
+```{r}
+table2_w_divs %>%
+  filter(up_div) %>%
+  group_by(day_gap) %>%
+  summarize(u = mean(resid), .groups = "drop") %>%
+  arrange(day_gap) %>%
+  mutate(U = cumsum(u)) %>%
+  ggplot(aes(x = day_gap, y = U)) +
+  geom_point()
+```
+
+```{r}
+table2_w_divs %>%
+  filter(!up_div) %>%
+  group_by(day_gap) %>%
+  summarize(u = mean(resid), .groups = "drop") %>%
+  arrange(day_gap) %>%
+  mutate(U = cumsum(u)) %>%
+  ggplot(aes(x = day_gap, y = U)) +
+  geom_point()
+```
+
+```{r}
+table2_w_divs %>%
+  filter(!is.na(up_div)) %>%
+  count(up_div)
+```
