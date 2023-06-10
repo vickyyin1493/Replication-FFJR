@@ -87,7 +87,7 @@ nyse_splits <-
   select(-date) %>%
   collect()
 ```
-
+We now create the variable "nyse_dsf", which represents the daily stock file restricted to NYSE stocks filtered for days with non-missing returns, and we joined this with the previous day_indexes variable, by the "date" which is a common variable that the daily stock file and day_indexes have in common. 
 ```{r nyse_dsf}
 #| include: false
 nyse_dsf <-
@@ -118,7 +118,9 @@ split_returns <-
 
 split_sample %>% distinct(permno) %>% count()
 split_sample %>% count()
+```
 
+```{r}
 index_returns <-
   dsi %>%
   select(date, vwretd, ewretd) %>%
@@ -153,7 +155,11 @@ abnormal_returns <-
   mutate(resid = lpr - predicted) %>%
   select(permno, date, resid)
 ```
+After calculating the abnormal returns according to FFJR's approach, we can now replicate an important aspect of the FFJR paper, which is essentially Figure 2b. However, a difference between the graph below and FFJR's Figure 2b is that this figure outlines the relationship between the cumulative average residuals of all splits but primarily focused on the announcement date instead of the effective date. Additionally, the x-axis is in terms of "days" in our replication which is more specific than FFJR's months approach due to the lack of computational abilities at the time. 
 
+Nonetheless, regarding the figure itself, we continue to observe a similar pattern to FFJR's Figure 2b despite the different nature of the dates investigated. Specifically, 
+
+In consequence, it can still be deemed that Theory A is the theory that is consistent with the graph pattern observed. 
 ```{r}
 table2_data <-
   abnormal_returns %>%
