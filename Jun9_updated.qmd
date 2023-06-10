@@ -171,6 +171,13 @@ table2_data %>%
   geom_point()
 ```
 
+Theory B suggests that firms use stock splits to signal dividend announcements which in turn signals future prospects. There are two components in this theory, one is that stock splits signals dividends and another one is that dividends signal future prospects.
+Both components act together and implicitly suggests that the market, being aware of firms' signaling rationales, will be expecting dividends after split snnouncements.  
+
+In this part of the replication, we tried to observe market reactions for the firms that announced stock splits. By differentiating the firms that had 'dividend increases' and 'dividend decreases' post split announcements, we attempt to evaluate theory B through whether market participants would react differently when firms' decisions align/misalign with their expectations. 
+
+Assuming theory B holds, then the market should react positively when split announced and stays the same afterwards for firms that announced dividend increases and react positively initially and then negatively for firms that annlunced dividend decreases. This is due to the market's expectation that firms announced stock splits will announce dividend increases, and when they are not receiving what's been expected, they would react nagatively as a result. 
+
 ```{r}
 #| include: false
 div_days <-
