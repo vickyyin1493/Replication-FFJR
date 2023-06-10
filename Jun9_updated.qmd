@@ -13,7 +13,7 @@ Add theories A' and B'' + explain
 
 **Main replication of FFJR**
 
-We begin by loading the required packages that will be used in our code throughout our FFJR replication. 
+We begin by identifying the required libraries that will provide the appropriate functions in our FFJR replication. 
 ```{r}
 #| include: false
 #| echo: false
