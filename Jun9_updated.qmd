@@ -37,13 +37,11 @@ library(farr)
 
 We connect to the CRSP database which contains prices and returns on all NYSE common stocks which was the stock exchange utilised in FFJR. We load the appropriate tables which contain the relevant announcement dates, splits and unique firm identifiers (permno) required in our subsequent code. Particularly, we utilised data from dsi and dsf, which stand for daily stock index and daily stock file respectively, as we attempt to replicate FFJR by utilising daily data (also disclosed above). 
 
-We create the variable "nyse_stocks" given that data on exchcd and shrcd on different dates can be sourced from crsp.stocknames. We continue to utilise "exchcd == 1" because we are restricting the stock splits to NYSE listed stocks since we continue to replicate FFJR. 
+We created the "splits" variable where we limited the announcement dates to the appropriate timeframe we are investigating (1990 to 2022), and identified cases where there were splits occurring. The data is sourced from dsedist which is a table that possesses information on different stock splits and dividend distributions which we will use in our replication below. 
 
-Notes to self: 
-Explain dsedist
-Create splits variable where we limited the data to the appropriate timeframe we are investigating, identified cases where there were splits 
-Only obtained information pertaining to NYSE stocks by creating the nyse_stocks variable (exchcd == 1 limits to NYSE) 
-Connected info for NYSE stocks to the splits variable via inner_join by the common identifier (mayber) "permno". 
+We also created the variable "nyse_stocks" given that data on exchcd and shrcd on different dates can be sourced from crsp.stocknames. We continue to utilise "exchcd == 1" because we are restricting the stock splits to NYSE listed stocks since we continue to replicate FFJR. 
+
+We then collated the information regarding the stock splits for NYSE stocks and their announcement dates into the "nyse_splits_raw" variable. 
 ```{r}
 pg <- dbConnect(RPostgres::Postgres(), bigint = "integer")
 
@@ -73,8 +71,10 @@ nyse_splits_raw <-
   filter(dclrdt >= namedt, dclrdt <= nameenddt) %>%
   collect() 
 ```
-We now create the variable day_indexes which involves information from the daily stock index table... add more 
+We now create the variable "day_indexes" which involves information from the daily stock index table and the index of a day depicts the order and placement in the sequence of days sourced from crsp.dsf and crsp.dsi. Subsequently, we are able to merge the data from "nyse_splits_raw" and "day_indexes" by day_index. 
 
+Note to self: 
+Explain get_event_dates in more detail. 
 ```{r}
 #| include: false
 day_indexes <-
@@ -98,6 +98,12 @@ nyse_splits <-
   collect()
 ```
 We now create the variable "nyse_dsf", which represents the daily stock file restricted to NYSE stocks filtered for days with non-missing returns, and we joined this with the previous day_indexes variable, by the "date" which is a common variable that the daily stock file and day_indexes have in common. 
+
+Afterwards, the variable "split_retrun-data" is created which contains day_rel_ex which is a variable measuring the number of days between the return and stock split.
+
+Given that FFJR looked at the behaviour in returns of securities 12 months before and after the split which was decided arbitrarily, we decide to look 365 days before and after the stock split in the variable "split_sample" to best replicate FFJR's approach. 
+
+We also attempt to count the number of splits in our sample. In our sample, we have 2305 splits in our sample, which is significantly more than the 940 stock splits within FFJR. We suspect this may be due to the nature of exploring daily data instead of monthly data. Moreover, this change could be due to changes in the underlying data and market since the 1970s. 
 ```{r nyse_dsf}
 #| include: false
 nyse_dsf <-
@@ -129,7 +135,9 @@ split_returns <-
 split_sample %>% distinct(permno) %>% count()
 split_sample %>% count()
 ```
+We continue to focus on vwretd in our analysis and identify it within "index_returns" which stands for the value-weighted return which involves distributions and weighs each stock within a given portfolio according to their market value when the portfolio is formed. 
 
+We also aim to partially address FFJR's worries for non-zero excess returns which can lead to "specification error" (page 4) which has led to FFJR excluding 15 months before the stock split. In our replication using daily data, we deemed this figure to be 450 days which is scaled to approximately 15 months in days (15 months x 30 days). 
 ```{r}
 index_returns <-
   dsi %>%
