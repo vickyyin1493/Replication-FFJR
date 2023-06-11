@@ -200,16 +200,20 @@ table2_data %>%
 
 Dividend Analysis 
 
-Theory B suggests that firms use stock splits to signal dividend announcements which in turn signals future prospects. There are two components in this theory, one is that stock splits signals dividends and another one is that dividends signal future prospects.
+In order to distinguish theory A (liquidity theory) and theory B (signalling theory), dividend would be an important aspect to analyse. 
+
+Theory B suggests that firms use stock splits to signal dividend announcements which in turn may also signal future prospects. There are two components in this theory, one is that stock splits signals dividends and another one is that dividends may signal future prospects.
 Both components act together and implicitly suggests that the market, being aware of firms' signaling rationales, will be expecting dividends after split announcements.  
 
 In this part of the replication, we tried to observe market reactions for the firms that announced stock splits. By differentiating the firms that had 'dividend increases' and 'dividend decreases' post split announcements, we attempt to evaluate theory B through whether market participants would react differently when firms' decisions align/misalign with their expectations. 
 
-Assuming theory B holds, then the market should react positively when splits are first announced and will not subsequently react for firms that announced dividend increases and react negatively for firms that announced dividend decreases. This is due to the market's expectation that firms announced stock splits will announce dividend increases, and when their expectation are not being met, they would react through negative returns.
+Assuming theory B holds, then the market should react positively when splits are first announced and will not subsequently react for firms that announced dividend increases but react negatively for firms that announced dividend decreases. This is due to the (assumed) market's expectation that firms announced stock splits will announce dividend increases (theory B) as they were using stock splits as a signalling tool, and when the market's expectation are not being met, it would react through negative returns.
 
-As firms could announce dividends multiple times per day (although it might be highly unlikely), we followed the approach in the textbook and calculated daily dividend amounts. We then selected NYSE stocks for our purpose of the analysis. 
+As firms could pay dividends multiple times per day (although it might be highly unlikely), we followed the approach in the textbook and calculated daily dividend amounts. We then selected NYSE stocks for our purpose of the analysis. 
 
-In order to calculate 
+Following FFJR, for a given day t, we calculated total dividends paid from day t-364 to day t (div_trailing), and also from day t+1 to day t+365 (div_forward). This is to calculate the 'dividend change ratio' as defined in FFJR. We followed the approach in the textbook to calculate total dividend per equivalent unsplit share using cfacshr and treat no dividend as divamt = 0. 
+
+We encountered some problems in specifying meaningful cases. We were deciding whether we should follow a similar approach in the textbook and exclude cases where a stock has listed within the last twelve months or delists in the subsequent months. When we were analysing the distributions of days_trailing and days_forward which are the numbers of days a stock is listed from t-364 to t and from t+1 to t+365, we found that a lot more firms have 365 days before and after compared to any other numbers of days. While it could be problematic to restrict exactly 365 days (as suggested by Ian), it might be the better number to use compared to others. However, using this approach gives us significantly less data points compared to month-based restrictions, while leaving out this restriction may yield us less-meaningful dividend change ratio. We decided to turn to alternative approach as suggested by Ian and aggregated the data by month before calculating.  
 
 ```{r}
 #| include: false
