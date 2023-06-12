@@ -153,7 +153,7 @@ split_returns_reg <-
   select(permno, date, ret, exclude) %>%
   distinct() 
 ```
-We now calculate the returns in a similar approach as FFJR. In particular, a market model is esitmated by regressing the log of gross returns of each stock on the log of gross returns of a market index before taking the residual as shown in FFJR.
+We now estimate regressions and calculate the abnormal returns in a similar approach to FFJR. In particular, a market model is esitmated by regressing the log of gross returns of each stock on the log of gross returns of a market index before taking the residual as shown in FFJR.
 ```{r}
 #| include: false
 abnormal_returns <-
