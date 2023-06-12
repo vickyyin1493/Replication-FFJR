@@ -1,25 +1,26 @@
 **Introduction**
 
-Overall, we attempted to replicate FFJR's study concerning whether there are unusual behaviour in the returns of a stock following a stock split and the relationship between stock splits and dividends as a large portion of stocks splits are typically followed by dividend announcements in the past. However, we have extended the original replication to utilise more recent data (from 1990 to 2022) and daily data which can be identified as extensions beyond the original FFJR study which used monthly data and the data ranged from 1926 to 1960. These changes were implemented as we would like to identify whether the results from FFJR would still hold in a contemporary market and hence, also identify whether there are new theorie s concerning stock splits compared to the 1970s. Moreover, we have also utilised the actual announcement dates as this was only estimated within FFJR and we have decided to refine this and utilise actual announcement dates that are currently available to extend the results obtained in FFJR. 
+Overall, we attempted to replicate FFJR's study concerning whether there is unusual behaviour in a stock's returns following a stock split and the relationship between stock splits and dividends, as dividend announcements typically follow a large portion of stock splits in the past. However, we have extended the original replication to utilise more recent data (from 1990 to 2022) and daily data, which can be identified as extensions beyond the original FFJR study, which used monthly data, and the data ranged from 1926 to 1960. These changes were implemented as we would like to identify whether the results from FFJR would still hold in a contemporary market and determine whether there are new theories concerning stock splits compared to the 1970s. Moreover, we have also utilised the actual announcement dates as this was only estimated within FFJR, and we have decided to refine this and use announcement dates that are currently available to extend the results obtained in FFJR. 
 
-Regarding the key theories at the time, FFJR presented several theories that also provide a key foundation to our analysis and explanation of subsequent results. During our seminar on FFJR, it was divulged that the following theories were proposed and considered a spossible explanations to the graphs protrayed in FFJR. Specifically, the relevant theories initially explored were: 
+Regarding the pivotal theories at the time, FFJR analysed several theories that provided a crucial foundation for our analysis and explanation of subsequent results. During our seminar on FFJR, it was divulged that the following hypotheses were proposed and considered possible reasons for the graphs displayed in FFJR. Specifically, the relevant theories initially explored were: 
 
 **Theory A:** Firms like to keep their stock price within certain bounds. When the stock price rises above a certain threshold, a firm may initiate a split, announcing it several weeks in advance of its effective date.
 **Theory B:** Firms use splits to signal private information about firm prospects. A firm will announce a split several weeks in advance of its effective date. 
 
-Specifically, Theory A represents the liquidity hypothesis where firms tend to utilise stock splits to signal private information on the firm's positive outlook (add ref) and Theory B denotes the information signalling hypothesis where firms attempt to improve the liquidity of their stocks via stock splits (add ref). After scrutinising recent literature, we discover that these theories remain signfiicant in explaining management's intentions surrounding stock splits (ref). 
+Specifically, Theory A represents the liquidity hypothesis, where firms tend to utilise stock splits to signal private information on the firm's positive outlook (add ref), and Theory B denotes the information signalling hypothesis, where firms attempt to improve the liquidity of their stocks via stock splits (add ref). After scrutinising recent literature, we discover these theories remain significant in explaining management's intentions surrounding stock splits (ref). 
 
-Given the above, we therefore discussed alternative theories during our seminar. Particularly, we believe that the following theories that constitute extensions of Theories A and B are applicable in FFJR and our results obtained below. 
+Given the above, we discussed alternative theories during our seminar. Notably, we believe that the following views that constitute extensions of Theories A and B are applicable in FFJR and our results obtained below. 
 
-Theory A': Firms like to keep their stock price within certain bounds. When the stock price rises above a certain threshold, a firm may initiate a split, announcing it several weeks in advance of its effective date. Firms do not use splits to signal private information about firm prospects. Pre-split stock prices may be driven by information that suggests an imminent increase in dividends. 
+Theory A': Firms like to keep their stock price within certain bounds. When the stock price rises above a certain threshold, a firm may initiate a split, announcing it several weeks in advance of its effective date. Firms do not use splits to signal private information about firm prospects. Pre-split stock prices may be driven by information suggesting an imminent dividend increase. 
 
-**Theory B'':** Firms use splits to signal private information about future dividend increases, which in turn signal private information about firm prospects. A firm will announce a split several weeks in advance of its effective date. 
+**Theory B":** Firms use splits to signal private information about future dividend increases, which in turn signal private information about firm prospects. A firm will announce a split several weeks in advance of its effective date. 
 
-These theories and their applicability to our replication and FFJR will be explained in the main replication and dividend analyses below.
+The primary replication and dividend analyses below will explain these theories and their applicability to our replication and FFJR.
 
 **Main replication of FFJR**
 
-We begin by identifying the required libraries that will provide the appropriate functions in our FFJR replication. 
+We begin by identifying the required libraries to provide the appropriate functions in our FFJR replication.
+
 ```{r}
 #| include: false
 #| echo: false
@@ -33,13 +34,13 @@ library(lubridate)
 library(farr)
 ```
 
-We connect to the CRSP database which contains prices and returns on all NYSE common stocks which was the stock exchange utilised in FFJR. We load the appropriate tables which contain the relevant announcement dates, splits and unique firm identifiers (permno) required in our subsequent code. Particularly, we utilised data from dsi and dsf, which stand for daily stock index and daily stock file respectively, as we attempt to replicate FFJR by utilising daily data (also disclosed above). 
+We connect to the CRSP database, which contains prices and returns on all NYSE common stocks, which was the stock exchange utilised in FFJR. We load the appropriate tables, which include the relevant announcement dates, splits and unique firm identifiers (permno) required in our subsequent code. Mainly, we utilised data from dsi and dsf, which stand for daily stock index and daily stock file, respectively, as we attempted to replicate FFJR by using daily data (also disclosed above). 
 
-We created the "splits" variable where we limited the announcement dates to the appropriate timeframe we are investigating (1990 to 2022), and identified cases where there were splits occurring. The data is sourced from dsedist which is a table that possesses information on different stock splits and dividend distributions which we will use in our replication below. 
+We created the "splits" variable, limiting the announcement dates to the appropriate timeframe we are investigating (1990 to 2022) and identifying cases where splits occurred. The data is sourced from dsedist, a table with information on different stock splits and dividend distributions, which we will use in our replication below. 
 
-We also created the variable "nyse_stocks" given that data on exchcd and shrcd on different dates can be sourced from crsp.stocknames. We continue to utilise "exchcd == 1" because we are restricting the stock splits to NYSE listed stocks since we continue to replicate FFJR. 
+We also created the variable "nyse_stocks" given that data on exchcd and shrcd on different dates can be sourced from crsp.stocknames. We continue to utilise "exchcd == 1" because we are restricting the stock splits to NYSE-listed stocks since we continue replicating FFJR. 
 
-We then collated the information regarding the stock splits for NYSE stocks and their announcement dates into the "nyse_splits_raw" variable. 
+We then collated the information regarding the stock splits for NYSE stocks and their announcement dates into the "nyse_splits_raw" variable.
 ```{r}
 pg <- dbConnect(RPostgres::Postgres(), bigint = "integer")
 
@@ -69,9 +70,9 @@ nyse_splits_raw <-
   filter(dclrdt >= namedt, dclrdt <= nameenddt) %>%
   collect() 
 ```
-We now create the variable "day_indexes" which involves information from the daily stock index table and the index of a day depicts the order and placement in the sequence of days sourced from crsp.dsf and crsp.dsi. Subsequently, we are able to merge the data from "nyse_splits_raw" and "day_indexes" by day_index. 
+We now create the variable "day_indexes", which involves information from the daily stock index table, and the index of a day depicts the order and placement in the sequence of days sourced from crsp.dsf and crsp.dsi. Subsequently, we can merge the data from "nyse_splits_raw" and "day_indexes" by day_index. 
 
-Regarding the next step, we had to combine our splits data from "nyse_splits_raw" to our "day_indexes" data by "day". However, during this process we encountered various issues including the loss of splits data, especially by utilising "inner_join". At first, we attempted to utilise "left_join" which limited the loss of splits data but there continued to be 12 splits missing when comparing "nyse_splits_raw" and "nyse_splits". It was later revealed that this was likely due to the problem where the announcement dates (dclrdt) not being in our "day_indexes" variable which could be due to the announcement of the split occurring on a non-trading date or weekend and this was not taken into account. To combat this issue, "get_event_dates" was utilised as a function it specifically creates a table which maps announcements to trading dates and subsequently, we no longer enountered missing splits data between "nyse_splits_raw" and "nyse_splits".
+Regarding the next step, we had to combine our splits data from "nyse_splits_raw" to our "day_indexes" data by "day". However, during this process, we encountered various issues, including the loss of split data, especially by utilising "inner_join". At first, we attempted to use "left_join", which limited the loss of splits data, but there continued to be 12 splits missing when comparing "nyse_splits_raw" and "nyse_splits". It was later revealed that this was likely due to the problem where the announcement dates (dclrdt) not being in our "day_indexes" variable, which could be due to the announcement of the split occurring on a non-trading date or weekend, and this was not taken into account. To combat this issue, "get_event_dates" was utilised as a function, and it creates a table that maps announcements to trading dates, and subsequently, we no longer encountered missing splits data between "nyse_splits_raw" and "nyse_splits".
 ```{r}
 #| include: false
 day_indexes <-
@@ -94,13 +95,13 @@ nyse_splits <-
   select(-date) %>%
   collect()
 ```
-We now create the variable "nyse_dsf", which represents the daily stock file restricted to NYSE stocks filtered for days with non-missing returns, and we joined this with the previous day_indexes variable, by the "date" which is a common variable that the daily stock file and day_indexes have in common. 
+We now create the variable "nyse_dsf", which represents the daily stock file restricted to NYSE stocks filtered for days with non-missing returns, and we joined this with the previous day_indexes variable, by the "date", which is a variable that the daily stock file and day_indexes have in common. 
 
-Afterwards, the variable "split_retrun-data" is created which contains day_rel_ex which is a variable measuring the number of days between the return and stock split.
+Afterwards, the variable "split_return_data" is created, which contains day_rel_ex, which measures the number of days between the return and stock split.
 
-Given that FFJR looked at the behaviour in returns of securities 12 months before and after the split which was decided arbitrarily, we decide to look 365 days before and after the stock split in the variable "split_sample" to best replicate FFJR's approach. 
+Given that FFJR looked at the behaviour in returns of securities 12 months before and after the split, which was decided arbitrarily, we decided to look 365 days before and after the stock split in the variable "split_sample" to replicate FFJR's approach best. 
 
-We also attempt to count the number of splits in our sample. In our sample, we have 2305 splits in our sample, which is significantly more than the 940 stock splits within FFJR. We suspect this may be due to the nature of exploring daily data instead of monthly data. Moreover, this change could be due to changes in the underlying data and market since the 1970s. 
+We also attempt to count the number of splits in our sample. Our sample has 2305 splits, which is significantly more than the 940 stock splits within FFJR. We suspect this may be due to the nature of exploring daily data instead of monthly data. Moreover, this change could be due to changes in the underlying data and market since the 1970s.
 ```{r nyse_dsf}
 #| include: false
 nyse_dsf <-
@@ -132,9 +133,9 @@ split_returns <-
 split_sample %>% distinct(permno) %>% count()
 split_sample %>% count()
 ```
-We continue to focus on vwretd in our analysis and identify it within "index_returns" which stands for the value-weighted return which involves distributions and weighs each stock within a given portfolio according to their market value when the portfolio is formed. 
+We continue to focus on vwretd in our analysis and identify it within "index_returns", which stands for the value-weighted return, which involves distributions and weighs each stock within a given portfolio according to their market value when the portfolio is formed. 
 
-We also aim to partially address FFJR's worries for non-zero excess returns which can lead to "specification error" (page 4) which has led to FFJR excluding 15 months before the stock split. In our replication using daily data, we deemed this figure to be 450 days which is scaled to approximately 15 months in days (15 months x 30 days). 
+We also aim to partially address FFJR's worries about non-zero excess returns, which can lead to "specification error" (page 4), leading to FFJR excluding 15 months before the stock split. In our replication using daily data, we deemed this figure to be 450 days, scaled to approximately 15 months in days (15 months x 30 days).
 ```{r}
 index_returns <-
   dsi %>%
@@ -153,7 +154,7 @@ split_returns_reg <-
   select(permno, date, ret, exclude) %>%
   distinct() 
 ```
-We now estimate regressions and calculate the abnormal returns in a similar approach to FFJR. In particular, a market model is esitmated by regressing the log of gross returns of each stock on the log of gross returns of a market index before taking the residual as shown in FFJR.
+We now estimate regressions and calculate the abnormal returns similarly to FFJR. In particular, a market model is estimated by regressing the log of gross returns of each stock on the log of gross returns of a market index before taking the residual, as shown in FFJR.!
 ```{r}
 #| include: false
 abnormal_returns <-
@@ -180,11 +181,11 @@ table2_data <-
   mutate(day_gap = day_index - ex_day_index) %>%
   filter(abs(day_gap) <= 365)
 ```
-After calculating the abnormal returns according to FFJR's approach, we can now replicate an important aspect of the FFJR paper, which is essentially Figure 2b. However, a difference between the graph below and FFJR's Figure 2b is that this figure outlines the relationship between the cumulative average residuals of all splits but primarily focused on the announcement date instead of the effective date. Additionally, the x-axis is in terms of "days" in our replication which is more specific than FFJR's months approach due to the lack of computational abilities at the time. 
+After calculating the abnormal returns according to FFJR's approach, we can now replicate a critical aspect of the FFJR paper, which is essentially Figure 2b. However, a difference between the graph below and FFJR's Figure 2b is that this figure outlines the relationship between the cumulative average residuals of all splits but primarily focuses on the announcement date instead of the effective date. Additionally, the x-axis is in terms of "days" in our replication which is more specific than FFJR's month approach due to the lack of computational abilities at the time. 
 
-Nonetheless, regarding the figure itself, we continue to observe a similar pattern to FFJR's Figure 2b despite the different nature of the dates investigated and the more recent data surrounding stock returns and stock splits used. Specifically, there is an increase in the cumulative average residuals increase significantly leading up to the announcement date of the stock split but this steep increases halts after the announcement date. 
+Nonetheless, regarding the figure itself, we continue to observe a similar pattern to FFJR's Figure 2b despite the different nature of the dates investigated and the more recent data surrounding stock returns and stock splits used. Specifically, there is an increase in the cumulative average residuals increases significantly leading up to the announcement date of the stock split. Still, this steep increase halts after the announcement date. 
 
-Regarding the theory alignment, it can be identified that FFJR primarily argues for Theory B within the paper where it is mentioned that a proposed split may be utilised to be a "source of information" to reduce uncertainty (page 2). Again, this theory as revealed in the introduction, aligns more closely with the information signalling hypothesis that firms will reveal information regarding the firm’s positive prospects to the market. However, the figure obtained below aligns more closely with Theory A, which denotes the liquidity hypothesis where management utilises stock splits to enhance their stock’s liquidity. This can be observed by the increase in stock returns prior to the stock split announcement, which again infers that firms will implement a stock split when security prices are high, indicated by the positive or rising returns. Hence, this shows that the liquidity hypothesis is both applicable to the market in 1926-1960 and the current market as well. Furthermore, it can still be deemed that Theory A is the theory that is consistent with the graph pattern observed in comparison to the information signalling hypothesis, denoted by Theory B. 
+Regarding the theory alignment, it can be identified that FFJR primarily argues for Theory B within the paper, where it is mentioned that a proposed split may be utilised as a "source of information" to reduce uncertainty (page 2). Again, as revealed in the introduction, this theory aligns more closely with the information signalling hypothesis that firms will disclose information regarding the firm's positive prospects to the market. However, the figure obtained below aligns more closely with Theory A, which denotes the liquidity hypothesis where management utilises stock splits to enhance their stock's liquidity. This can be observed by the increase in stock returns before the stock split announcement, which again infers that firms will implement a stock split when security prices are high, indicated by positive or rising returns. Hence, this shows that the liquidity hypothesis applies to both the market in 1926-1960 and the current market. Furthermore, it can still be deemed that Theory A is the theory that is consistent with the graph pattern observed in comparison to the information signalling hypothesis, denoted by Theory B.
 ```{r}
 table2_data %>%
   group_by(day_gap) %>%
@@ -197,21 +198,20 @@ table2_data %>%
 
 # Dividend Analysis
 
-In order to distinguish theory A (liquidity hypothesis) and theory B (information signalling hypothesis), the addition of an analysis concerning the relationship between stock splits and dividends would be significant to analyse. 
+To distinguish theory A (liquidity hypothesis) and theory B (information signalling hypothesis), the addition of analysis concerning the relationship between stock splits and dividends would be significant to analyse. 
 
-From the introduction, Theory B suggests that firms implement stock splits to signal dividend announcements which in turn may also signal future prospects. There are two components in this theory, one is that stock splits signals dividends and another one is that dividends may signal future prospects.
-Both components act together and implicitly suggests that the market, being aware of firms' signaling rationales, will be expecting dividends after split announcements.  
+From the introduction, Theory B suggests that firms implement stock splits to signal dividend announcements, which may also signal future prospects. This theory has two components: one is that stock splits signal dividends, and another one is that dividends may signal future prospects.
+Both components act together and implicitly suggest that the market, aware of firms' signalling rationales, will expect dividends after split announcements.  
 
-In this part of the replication, we tried to observe market reactions for the firms that announced stock splits. By differentiating the firms that had 'dividend increases' and 'dividend decreases' post split announcements, we attempt to evaluate theory B through whether market participants would react differently when firms' decisions align/misalign with their expectations. 
+In this part of the replication, we tried to observe market reactions for the firms that announced stock splits. By differentiating the firms with 'dividend increases' and 'dividend decreases' post-split announcements, we evaluate theory B through whether market participants would react differently when firms' decisions align/misalign with their expectations. 
 
-Assuming theory B holds, then the market should react positively when splits are first announced and will not subsequently react for firms that announced dividend increases but react negatively for firms that announced dividend decreases. This is due to the (assumed) market's expectation that firms announced stock splits will announce dividend increases (theory B) as they were using stock splits as a signalling tool, and when the market's expectation are not being met, it would react through negative returns.
+Assuming Theory B holds, the market should react positively when splits are first announced and will not react negatively for firms that announced dividend increases but react negatively for firms announcing dividend decreases. This is due to the (assumed) market's expectation that firms that announced stock splits will announce dividend increases (theory B) as they used stock splits as a signalling tool. When the market's expectations are unmet, it will react through negative stock returns.
 
-As firms could pay dividends multiple times per day (although it might be highly unlikely), we followed the approach in the textbook and calculated daily dividend amounts. We then selected NYSE stocks for our purpose of the analysis. 
+As firms could pay dividends multiple times per day (although it might be implausible), we followed the approach in the textbook and calculated daily dividend amounts. We then selected NYSE stocks for our purpose of analysis. 
 
-Following FFJR, for a given day t, we calculated total dividends paid from day t-364 to day t (div_trailing), and also from day t+1 to day t+365 (div_forward). This is to calculate the 'dividend change ratio' as defined in FFJR. We followed the approach in the textbook to calculate total dividend per equivalent unsplit share using cfacshr and treat no dividend as divamt = 0. 
+Following FFJR, for a given day t, we calculated total dividends paid from day t-364 to day t (div_trailing) and from day t+1 to day t+365 (div_forward). This calculates the 'dividend change ratio' defined in FFJR. We followed the approach in the textbook to calculate the total dividend per equivalent unsplit share using cfacshr and treat no dividend as divamt = 0. 
 
-We encountered some problems in specifying meaningful cases. We were deciding whether we should follow a similar approach in the textbook and exclude cases where a stock has listed within the last twelve months or delists in the subsequent months. When we were analysing the distributions of days_trailing and days_forward which are the numbers of days a stock is listed from t-364 to t and from t+1 to t+365, we found that a lot more firms have 365 days before and after compared to any other numbers of days. While it could be problematic to restrict exactly 365 days (as suggested by Ian), it might be the better number to use compared to others. However, using this approach gives us significantly less data points compared to month-based restrictions, while leaving out this restriction may yield us less-meaningful dividend change ratio. We decided to turn to alternative approach as suggested by Ian and aggregated the data by month before calculating.  
-
+We encountered some problems in specifying meaningful cases. We were deciding whether to follow a similar approach in the textbook and exclude cases where a stock has been listed within the last twelve months or delisted in subsequent months. When we were analysing the distributions of days_trailing and days_forward, which are the numbers of days stock is listed from t-364 to t and from t+1 to t+365, we found that a lot more firms have 365 days before and after compared to any other numbers of days. While it could be problematic to restrict precisely 365 days (as suggested by Ian), it might be a better number to use than others. However, this approach gives us significantly fewer data points than month-based restrictions, while leaving out this restriction may yield a less-meaningful dividend change ratio. We decided to turn to an alternative approach as suggested by Ian and aggregated the data by month before calculating.
 ```{r}
 #| include: false
 div_days <-
@@ -233,7 +233,6 @@ nyse_divs_raw <-
 ```
 
 In the next chunk, we investigated the distribution for days_forward and days_trailing for dividends data to evaluate the suitability of restricting 365 days before and after.
-
 ```{r}
  #investigate distribution for days_forward 
 
@@ -262,8 +261,7 @@ nyse_divs_raw %>%
   ggplot(aes(days_trailing)) +   geom_histogram()
 ```
 
-In the next chunk, we aggregated the data by month, excluded less-meaningful cases and then proceeded by using daily data without filtering to calculate daily dividend amounts.
-
+In the chunk below, we aggregated the data by month, excluded less-meaningful cases and then proceeded by using daily data without filtering to calculate daily dividend amounts.
 ```{r}
 nyse_divs <-
   nyse_divs_raw %>%
@@ -288,9 +286,8 @@ nyse_divs <-
   collect()
 ```
 
-We are interested in the dividends paid by NYSE firms that announced splits. We used full-join here rather than left_join in the original replication. This is because using left_join would give us substantially less data points for split_firm_dividends, specifically, we will be left with only 1 split_firm_dividends while full_join gave us all data points. 
-However, we will be left with a lot of NA values for dclrdt (announcement dates) using full_join, luckily, the day column captures the same information and is not lost in the joining process. We then changed the following code to use day instead of dclrdt.
-
+We are interested in the dividends paid by NYSE firms that announced splits. We used full_join here rather than left_join in the initial replication. This is because using left_join would give us substantially fewer data points for split_firm_dividends. Specifically, we will be left with only one split_firm_dividends while full_join gives us all data points. 
+However, we will be left with many NA values for dclrdt (announcement dates) using full_join. Luckily, the day column captures the same information and is not lost in the joining process. We then changed the following code to use day instead of dclrdt.
 ```{r split_firm_dividends}
 #| include: false
 split_firm_dividends <-
@@ -303,8 +300,7 @@ split_firm_dividends <-
 ```
 
 We also calculated the market dividend change ratio as a benchmark for identifying 'dividend increases'.
-'Dividend increases' (up_div) here is defined as when the split firm's dividend change ratio is greater than the market dividend change ratio in a given day. 
-
+'Dividend increases' (up_div) is when the split firm's dividend change ratio is greater than the market dividend change ratio in a given day.
 ```{r}
 #| include: false
 div_mkt <- #day here is dividend date
@@ -323,8 +319,7 @@ dividends_file <-
   mutate(up_div = div_ratio >= mkt_div_ratio)
 ```
 
-As we named both date and dclrdt as day previously, we wanted to specify a value to use when plotting the dividend data, here, we used date to produce an analogue of figure 3c from FFJR.
-
+As we named both date and dclrdt as day previously, we wanted to specify a value to use when plotting the dividend data. Here, we used the date to produce an analogue of Figure 3c from FFJR.
 ```{r}
 #| include: false
 table2_w_divs <- 
