@@ -71,8 +71,7 @@ nyse_splits_raw <-
 ```
 We now create the variable "day_indexes" which involves information from the daily stock index table and the index of a day depicts the order and placement in the sequence of days sourced from crsp.dsf and crsp.dsi. Subsequently, we are able to merge the data from "nyse_splits_raw" and "day_indexes" by day_index. 
 
-Note to self: 
-Explain get_event_dates in more detail. 
+Regarding the next step, we had to combine our splits data from "nyse_splits_raw" to our "day_indexes" data by "day". However, during this process we encountered various issues including the loss of splits data, especially by utilising "inner_join". At first, we attempted to utilise "left_join" which limited the loss of splits data but there continued to be 12 splits missing when comparing "nyse_splits_raw" and "nyse_splits". It was later revealed that this was likely due to the problem where the announcement dates (dclrdt) not being in our "day_indexes" variable which could be due to the announcement of the split occurring on a non-trading date or weekend and this was not taken into account. To combat this issue, "get_event_dates" was utilised as a function it specifically creates a table which maps announcements to trading dates and subsequently, we no longer enountered missing splits data between "nyse_splits_raw" and "nyse_splits".
 ```{r}
 #| include: false
 day_indexes <-
@@ -185,7 +184,7 @@ After calculating the abnormal returns according to FFJR's approach, we can now 
 
 Nonetheless, regarding the figure itself, we continue to observe a similar pattern to FFJR's Figure 2b despite the different nature of the dates investigated and the more recent data surrounding stock returns and stock splits used. Specifically, there is an increase in the cumulative average residuals increase significantly leading up to the announcement date of the stock split but this steep increases halts after the announcement date. 
 
-Regarding the theory alignment, it can be identified that FFJR primarily argues for Theory B within the paper. This theory as revealed in the introduction, aligns more closely with the information signalling hypothesis that firms will reveal information regarding the firm’s positive prospects to the market. However, the figure obtained below aligns more closely with Theory A, which denotes the liquidity hypothesis where management utilises stock splits to enhance their stock’s liquidity.  Hence, this shows that the liquidity hypothesis may have been more applicable to the market in 1926-1960. In consequence, it can still be deemed that Theory A is the theory that is consistent with the graph pattern observed. 
+Regarding the theory alignment, it can be identified that FFJR primarily argues for Theory B within the paper where it is mentioned that a proposed split may be utilised to be a "source of information" to reduce uncertainty (page 2). Again, this theory as revealed in the introduction, aligns more closely with the information signalling hypothesis that firms will reveal information regarding the firm’s positive prospects to the market. However, the figure obtained below aligns more closely with Theory A, which denotes the liquidity hypothesis where management utilises stock splits to enhance their stock’s liquidity. This can be observed by the increase in stock returns prior to the stock split announcement, which again infers that firms will implement a stock split when security prices are high, indicated by the positive or rising returns. Hence, this shows that the liquidity hypothesis is both applicable to the market in 1926-1960 and the current market as well. Furthermore, it can still be deemed that Theory A is the theory that is consistent with the graph pattern observed in comparison to the information signalling hypothesis, denoted by Theory B. 
 ```{r}
 table2_data %>%
   group_by(day_gap) %>%
@@ -198,9 +197,9 @@ table2_data %>%
 
 # Dividend Analysis
 
-In order to distinguish theory A (liquidity theory) and theory B (signalling theory), dividend would be an important aspect to analyse. 
+In order to distinguish theory A (liquidity hypothesis) and theory B (information signalling hypothesis), the addition of an analysis concerning the relationship between stock splits and dividends would be significant to analyse. 
 
-Theory B suggests that firms use stock splits to signal dividend announcements which in turn may also signal future prospects. There are two components in this theory, one is that stock splits signals dividends and another one is that dividends may signal future prospects.
+From the introduction, Theory B suggests that firms implement stock splits to signal dividend announcements which in turn may also signal future prospects. There are two components in this theory, one is that stock splits signals dividends and another one is that dividends may signal future prospects.
 Both components act together and implicitly suggests that the market, being aware of firms' signaling rationales, will be expecting dividends after split announcements.  
 
 In this part of the replication, we tried to observe market reactions for the firms that announced stock splits. By differentiating the firms that had 'dividend increases' and 'dividend decreases' post split announcements, we attempt to evaluate theory B through whether market participants would react differently when firms' decisions align/misalign with their expectations. 
