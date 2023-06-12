@@ -181,7 +181,7 @@ table2_data <-
   mutate(day_gap = day_index - ex_day_index) %>%
   filter(abs(day_gap) <= 365)
 ```
-After calculating the abnormal returns according to FFJR's approach, we can now replicate a critical aspect of the FFJR paper, which is essentially Figure 2b. However, a difference between the graph below and FFJR's Figure 2b is that this figure outlines the relationship between the cumulative average residuals of all splits but primarily focuses on the announcement date instead of the effective date. Additionally, the x-axis is in terms of "days" in our replication which is more specific than FFJR's month approach due to the lack of computational abilities at the time. 
+After calculating the abnormal returns according to FFJR's approach, we can now extend the replication to a critical aspect of the FFJR paper, which is essentially Figure 2b. However, a difference between the graph below and FFJR's Figure 2b is that this figure outlines the relationship between the cumulative average residuals of all splits but primarily focuses on the announcement date instead of the effective month. The x-axis is in terms of "days" in our replication which is more specific than FFJR's month approach due to the lack of computational abilities at the time. 
 
 Nonetheless, regarding the figure itself, we continue to observe a similar pattern to FFJR's Figure 2b despite the different nature of the dates investigated and the more recent data surrounding stock returns and stock splits used. Specifically, there is an increase in the cumulative average residuals increases significantly leading up to the announcement date of the stock split. Still, this steep increase halts after the announcement date. 
 
