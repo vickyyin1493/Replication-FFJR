@@ -1,6 +1,6 @@
-Introduction
+**Introduction**
 
-Overall, we attempted to replicate FFJR's study concerning whether there are unusual behaviour in the returns of a stock following a stock split and the relationship between stock splits and dividends as a large portion of stocks splits are typically followed by dividend announcements in the past. However, we have extended the original replication to utilise more recent data (from 1990 to 2022) and daily data which can be identified as extensions beyond the original FFJR study which used monthly data and the data ranged from 1926 to 1960. These changes were implemented as we would like to identify whether the results from FFJR would still hold in a contemporary market and hence, also identify whether there are new theorie s concerning stock splits compared to the 1970s.  
+Overall, we attempted to replicate FFJR's study concerning whether there are unusual behaviour in the returns of a stock following a stock split and the relationship between stock splits and dividends as a large portion of stocks splits are typically followed by dividend announcements in the past. However, we have extended the original replication to utilise more recent data (from 1990 to 2022) and daily data which can be identified as extensions beyond the original FFJR study which used monthly data and the data ranged from 1926 to 1960. These changes were implemented as we would like to identify whether the results from FFJR would still hold in a contemporary market and hence, also identify whether there are new theorie s concerning stock splits compared to the 1970s. Moreover, we have also utilised the actual announcement dates as this was only estimated within FFJR and we have decided to refine this and utilise actual announcement dates that are currently available to extend the results obtained in FFJR. 
 
 Regarding the key theories at the time, FFJR presented several theories that also provide a key foundation to our analysis and explanation of subsequent results. During our seminar on FFJR, it was divulged that the following theories were proposed and considered a spossible explanations to the graphs protrayed in FFJR. Specifically, the relevant theories initially explored were: 
 
@@ -9,15 +9,13 @@ Regarding the key theories at the time, FFJR presented several theories that als
 
 Specifically, Theory A represents the liquidity hypothesis where firms tend to utilise stock splits to signal private information on the firm's positive outlook (add ref) and Theory B denotes the information signalling hypothesis where firms attempt to improve the liquidity of their stocks via stock splits (add ref). After scrutinising recent literature, we discover that these theories remain signfiicant in explaining management's intentions surrounding stock splits (ref). 
 
-Given the above, we therefore discussed alternative theories during our seminar. Particularly, we believe that the following theories are applicable in our subsequent results and replication. 
+Given the above, we therefore discussed alternative theories during our seminar. Particularly, we believe that the following theories that constitute extensions of Theories A and B are applicable in FFJR and our results obtained below. 
 
-Theory A': 
+Theory A': Firms like to keep their stock price within certain bounds. When the stock price rises above a certain threshold, a firm may initiate a split, announcing it several weeks in advance of its effective date. Firms do not use splits to signal private information about firm prospects. Pre-split stock prices may be driven by information that suggests an imminent increase in dividends. 
 
-Theory B'': 
+**Theory B'':** Firms use splits to signal private information about future dividend increases, which in turn signal private information about firm prospects. A firm will announce a split several weeks in advance of its effective date. 
 
-Notes to self: 
-Need to properly reference
-Add theories A' and B'' + explain
+These theories and their applicability to our replication and FFJR will be explained in the main replication and dividend analyses below.
 
 **Main replication of FFJR**
 
