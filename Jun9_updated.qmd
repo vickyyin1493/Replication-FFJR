@@ -198,7 +198,7 @@ table2_data %>%
   geom_point()
 ```
 
-Dividend Analysis 
+# Dividend Analysis
 
 In order to distinguish theory A (liquidity theory) and theory B (signalling theory), dividend would be an important aspect to analyse. 
 
@@ -233,56 +233,52 @@ nyse_divs_raw <-
   left_join(div_days, by = c("permno", "day")) %>%
   mutate(divamt = coalesce(divamt/cfacshr, 0)) %>%
   select(permno, day, divamt)
-
-nyse_divs <-
-  nyse_divs_raw %>%
-  group_by(permno) %>%
-  window_order(day) %>%
-  window_frame(from = -364, to = 0) %>%
-  mutate(div_trailing = sum(divamt, na.rm = TRUE),
-         days_trailing = sum(1, na.rm = TRUE)) %>%
-  window_frame(from = 1, to = 365) %>%
-  mutate(div_forward = sum(divamt, na.rm = TRUE),
-         days_forward = sum(1, na.rm = TRUE)) %>%
-  filter(days_trailing == 365, days_forward == 365) %>% #!!!
-  ungroup() %>%
-  select(permno, day, div_trailing, div_forward) %>%
-  collect()
 ```
 
+In the next chunk, we investigated the distribution for days_forward and days_trailing for dividends data to evaluate the suitability of restricting 365 days before and after.
+
 ```{r}
-#investigate distribution for days_forward
-nyse_divs_raw %>%
-  group_by(permno) %>%
-  window_order(day) %>%
-  window_frame(from = -364, to = 0) %>%
-  mutate(div_trailing = sum(divamt, na.rm = TRUE),
-         days_trailing = sum(1, na.rm = TRUE)) %>%
-  window_frame(from = 1, to = 365) %>%
-  mutate(div_forward = sum(divamt, na.rm = TRUE),
-         days_forward = sum(1, na.rm = TRUE)) %>%
-  ggplot(aes(days_forward)) +
-  geom_histogram() 
+ #investigate distribution for days_forward 
+
+nyse_divs_raw %>%   
+  group_by(permno) %>%   
+  window_order(day) %>%   
+  window_frame(from = -364, to = 0) %>%   
+  mutate(div_trailing = sum(divamt, na.rm = TRUE),          
+         days_trailing = sum(1, na.rm = TRUE)) %>%   
+  window_frame(from = 1, to = 365) %>%   
+  mutate(div_forward = sum(divamt, na.rm = TRUE),          
+         days_forward = sum(1, na.rm = TRUE)) %>%   
+  ggplot(aes(days_forward)) +   geom_histogram()
+
+#investigate distribution for days_trailing 
+
+nyse_divs_raw %>%   
+  group_by(permno) %>%   
+  window_order(day) %>%   
+  window_frame(from = -364, to = 0) %>%   
+  mutate(div_trailing = sum(divamt, na.rm = TRUE),          
+         days_trailing = sum(1, na.rm = TRUE)) %>%   
+  window_frame(from = 1, to = 365) %>%   
+  mutate(div_forward = sum(divamt, na.rm = TRUE),          
+         days_forward = sum(1, na.rm = TRUE)) %>%   
+  ggplot(aes(days_trailing)) +   geom_histogram()
 ```
-```{r}
-#investigate distribution for days_trailing
-nyse_divs_raw %>%
-  group_by(permno) %>%
-  window_order(day) %>%
-  window_frame(from = -364, to = 0) %>%
-  mutate(div_trailing = sum(divamt, na.rm = TRUE),
-         days_trailing = sum(1, na.rm = TRUE)) %>%
-  window_frame(from = 1, to = 365) %>%
-  mutate(div_forward = sum(divamt, na.rm = TRUE),
-         days_forward = sum(1, na.rm = TRUE)) %>%
-  ggplot(aes(days_trailing)) +
-  geom_histogram()
-```
+
+In the next chunk, we aggregated the data by month, excluded less-meaningful cases and then proceeded by using daily data without filtering to calculate daily dividend amounts.
 
 ```{r}
 nyse_divs <-
   nyse_divs_raw %>%
   group_by(permno) %>%
+  window_order(month) %>%
+  window_frame(from = -11, to = 0) %>%
+  mutate(mths_trailing = sum(1, na.rm = TRUE)) %>%
+  window_frame(from = 1, to = 12) %>%
+  mutate(mths_forward = sum(1, na.rm = TRUE)) %>%
+  filter(mths_trailing == 12, mths_forward == 12) %>%
+  ungroup() %>%
+  group_by(permno) %>%
   window_order(day) %>%
   window_frame(from = -364, to = 0) %>%
   mutate(div_trailing = sum(divamt, na.rm = TRUE),
@@ -294,6 +290,9 @@ nyse_divs <-
   select(permno, day, div_trailing, div_forward) %>%
   collect()
 ```
+
+We are interested in the dividends paid by NYSE firms that announced splits. We used full-join here rather than left_join in the original replication. This is because using left_join would give us substantially less data points for split_firm_dividends, specifically, we will be left with only 1 split_firm_dividends while full_join gave us all data points. 
+However, we will be left with a lot of NA values for dclrdt (announcement dates) using full_join, luckily, the day column captures the same information and is not lost in the joining process. We then changed the following code to use day instead of dclrdt.
 
 ```{r split_firm_dividends}
 #| include: false
@@ -305,6 +304,9 @@ split_firm_dividends <-
   filter(!is.na(div_ratio)) %>%
   select(permno, day, div_ratio) 
 ```
+
+We also calculated the market dividend change ratio as a benchmark for identifying 'dividend increases'.
+'Dividend increases' (up_div) here is defined as when the split firm's dividend change ratio is greater than the market dividend change ratio in a given day. 
 
 ```{r}
 #| include: false
@@ -324,6 +326,8 @@ dividends_file <-
   mutate(up_div = div_ratio >= mkt_div_ratio)
 ```
 
+As we named both date and dclrdt as day previously, we wanted to specify a value to use when plotting the dividend data, here, we used date to produce an analogue of figure 3c from FFJR.
+
 ```{r}
 #| include: false
 table2_w_divs <- 
@@ -342,6 +346,8 @@ table2_w_divs %>%
   ggplot(aes(x = day_gap, y = U)) +
   geom_point()
 ```
+
+And figure 3d from FFJR.
 
 ```{r}
 table2_w_divs %>%
