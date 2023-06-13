@@ -1,6 +1,13 @@
+---
+title: FFJR Replication
+author: Vicky and Jade
+format: html
+bibliography: book.bib
+---
+
 **Introduction**
 
-Overall, we attempted to replicate the study conducted by @Fama:1969wc concerning whether there is unusual behaviour in a stock's returns following a stock split and the relationship between stock splits and dividends, as dividend announcements typically follow a large portion of stock splits in the past @Fama:1969wc. However, we have extended the original replication to utilise more recent data (from 1990 to 2022) and daily data, which can be identified as extensions beyond the original @Fama:1969wc study, which used monthly data, and the data ranged from 1926 to 1960 @Fama:1969wc.  These changes were implemented as we would like to identify whether the results from @Fama:1969wc would still hold in a contemporary market and determine whether there are new theories concerning stock splits compared to the 1970s. Moreover, we have also utilised the actual announcement dates as this was only estimated by @Fama:1969wc, and we have decided to refine this and use announcement dates that are currently available to extend the results obtained in @Fama:1969wc. However, we continued to observe stocks listed on the New York Stock Exchange (NYSE) to more closely follow the approach @Fama:1969wc took at the time, but in a contemporary setting, utilising daily data and announcement dates.
+Overall, we attempted to replicate the study conducted by @Fama:1969wc concerning whether there is unusual behaviour in a stock's returns following a stock split and the relationship between stock splits and dividends, as dividend announcements typically follow a large portion of stock splits in the past @Fama:1969wc. However, we have extended the original replication to utilise more recent data (from 1990 to 2022) and daily data, which can be identified as extensions beyond the original @Fama:1969wc study, which used monthly data, and the data ranged from 1926 to 1960. These changes were implemented as we would like to identify whether the results from @Fama:1969wc would still hold in a contemporary market and determine whether there are new theories concerning stock splits compared to the 1970s. Moreover, we have also utilised the actual announcement dates as this was only estimated by @Fama:1969wc, and we have decided to refine this and use announcement dates that are currently available to extend the results obtained in @Fama:1969wc. However, we continued to observe stocks listed on the New York Stock Exchange (NYSE) to more closely follow the approach @Fama:1969wc took at the time, but in a contemporary setting, utilising daily data and announcement dates.
 
 Regarding the pivotal theories at the time, @Fama:1969wc analysed several theories that provided a crucial foundation for our analysis and explanation of subsequent results. During our seminar on @Fama:1969wc, it was divulged that the following hypotheses were proposed and considered possible reasons for the graphs displayed in the paper: 
 
@@ -11,7 +18,7 @@ Specifically, Theory A represents the liquidity hypothesis, where firms tend to 
 
 The primary replication and dividend analyses below will explain these theories and their applicability to our replication of @Fama:1969wc.
 
-**Main replication of @Fama:1969wc**
+# Main replication of @Fama:1969wc
 
 We begin by identifying the required libraries to provide the appropriate functions in our @Fama:1969wc replication.
 
