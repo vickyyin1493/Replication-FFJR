@@ -9,7 +9,7 @@ Regarding the pivotal theories at the time, @Fama:1969wc analysed several theori
 
 Specifically, Theory A represents the liquidity hypothesis, where firms tend to utilise stock splits to signal private information on the firm's positive outlook, and Theory B denotes the information signalling hypothesis, where firms attempt to improve the liquidity of their stocks via stock splits. After scrutinising recent literature, we discover these theories remain significant in explaining management's intentions surrounding stock splits. 
 
-The primary replication and dividend analyses below will explain these theories and their applicability to our replication and @Fama:1969wc.
+The primary replication and dividend analyses below will explain these theories and their applicability to our replication of @Fama:1969wc.
 
 **Main replication of @Fama:1969wc**
 
