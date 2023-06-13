@@ -209,7 +209,7 @@ Assuming Theory B holds, the market should react positively when splits are firs
 
 As firms could pay dividends multiple times per day (although it might be implausible), we followed the approach in the textbook and calculated daily dividend amounts. We then selected NYSE stocks for our purpose of analysis. 
 
-Following FFJR, for a given day t, we calculated total dividends paid from day t-364 to day t (div_trailing) and from day t+1 to day t+365 (div_forward). This calculates the 'dividend change ratio' defined in FFJR. We followed the approach in the textbook to calculate the total dividend per equivalent unsplit share using cfacshr and treat no dividend as divamt = 0. 
+Following @Fama:1969wc, for a given day t, we calculated total dividends paid from day t-364 to day t (div_trailing) and from day t+1 to day t+365 (div_forward). This calculates the 'dividend change ratio' defined in @Fama:1969wc. We followed the approach in the textbook to calculate the total dividend per equivalent unsplit share using cfacshr and treat no dividend as divamt = 0. 
 
 We encountered some problems in specifying meaningful cases. We were deciding whether to follow a similar approach in the textbook and exclude cases where a stock has been listed within the last twelve months or delisted in subsequent months. When we were analysing the distributions of days_trailing and days_forward, which are the numbers of days stock is listed from t-364 to t and from t+1 to t+365, we found that a lot more firms have 365 days before and after compared to any other numbers of days. While it could be problematic to restrict precisely 365 days (as suggested by Ian), it might be a better number to use than others. However, this approach gives us significantly fewer data points than month-based restrictions, while leaving out this restriction may yield a less-meaningful dividend change ratio. We decided to turn to an alternative approach as suggested by Ian and aggregated the data by month before calculating.
 ```{r}
@@ -319,7 +319,7 @@ dividends_file <-
   mutate(up_div = div_ratio >= mkt_div_ratio)
 ```
 
-As we named both date and dclrdt as day previously, we wanted to specify a value to use when plotting the dividend data. Here, we used the date to produce an analogue of Figure 3c from FFJR.
+As we named both date and dclrdt as day previously, we wanted to specify a value to use when plotting the dividend data. Here, we used the date to produce an analogue of Figure 3c from @Fama:1969wc.
 ```{r}
 #| include: false
 table2_w_divs <- 
@@ -339,7 +339,7 @@ table2_w_divs %>%
   geom_point()
 ```
 
-And figure 3d from FFJR.
+And figure 3d from @Fama:1969wc.
 
 ```{r}
 table2_w_divs %>%
