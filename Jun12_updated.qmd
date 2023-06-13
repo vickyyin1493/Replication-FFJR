@@ -1,6 +1,6 @@
 **Introduction**
 
-Overall, we attempted to replicate @Fama:1969wc's study concerning whether there is unusual behaviour in a stock's returns following a stock split and the relationship between stock splits and dividends, as dividend announcements typically follow a large portion of stock splits in the past @Fama:1969wc. However, we have extended the original replication to utilise more recent data (from 1990 to 2022) and daily data, which can be identified as extensions beyond the original @Fama:1969wc study, which used monthly data, and the data ranged from 1926 to 1960 @Fama:1969wc.  These changes were implemented as we would like to identify whether the results from @Fama:1969wc would still hold in a contemporary market and determine whether there are new theories concerning stock splits compared to the 1970s. Moreover, we have also utilised the actual announcement dates as this was only estimated by @Fama:1969wc, and we have decided to refine this and use announcement dates that are currently available to extend the results obtained in @Fama:1969wc. However, we continued to observe stocks listed on the New York Stock Exchange (NYSE) to more closely follow the approach @Fama:1969wc took at the time, but in a contemporary setting, utilising daily data and announcement dates.
+Overall, we attempted to replicate the study conducted by @Fama:1969wc concerning whether there is unusual behaviour in a stock's returns following a stock split and the relationship between stock splits and dividends, as dividend announcements typically follow a large portion of stock splits in the past @Fama:1969wc. However, we have extended the original replication to utilise more recent data (from 1990 to 2022) and daily data, which can be identified as extensions beyond the original @Fama:1969wc study, which used monthly data, and the data ranged from 1926 to 1960 @Fama:1969wc.  These changes were implemented as we would like to identify whether the results from @Fama:1969wc would still hold in a contemporary market and determine whether there are new theories concerning stock splits compared to the 1970s. Moreover, we have also utilised the actual announcement dates as this was only estimated by @Fama:1969wc, and we have decided to refine this and use announcement dates that are currently available to extend the results obtained in @Fama:1969wc. However, we continued to observe stocks listed on the New York Stock Exchange (NYSE) to more closely follow the approach @Fama:1969wc took at the time, but in a contemporary setting, utilising daily data and announcement dates.
 
 Regarding the pivotal theories at the time, @Fama:1969wc analysed several theories that provided a crucial foundation for our analysis and explanation of subsequent results. During our seminar on @Fama:1969wc, it was divulged that the following hypotheses were proposed and considered possible reasons for the graphs displayed in the paper: 
 
@@ -30,7 +30,7 @@ library(farr)
 
 We connect to the CRSP database, which contains prices and returns on all NYSE common stocks, which was the stock exchange utilised by @Fama:1969wc. We load the appropriate tables, which include the relevant announcement dates, splits and unique firm identifiers (permno) required in our subsequent code. Mainly, we utilised data from dsi and dsf, which stand for daily stock index and daily stock file, respectively, as we attempted to replicate @Fama:1969wc by using daily data (also disclosed above). 
 
-We created the "splits" variable, limiting the announcement dates to the appropriate timeframe we are investigating (1990 to 2022) and identifying cases where splits occurred, which is different to @Fama:1969wc's initial timeframe @Fama:1969wc. The data is sourced from dsedist, a table with information on different stock splits and dividend distributions, which we will use in our replication below. 
+We created the "splits" variable, limiting the announcement dates to the appropriate timeframe we are investigating (1990 to 2022) and identifying cases where splits occurred, which is different to the initial timeframe within @Fama:1969wc. The data is sourced from dsedist, a table with information on different stock splits and dividend distributions, which we will use in our replication below. 
 
 We also created the variable "nyse_stocks" given that data on exchcd and shrcd on different dates can be sourced from crsp.stocknames. We continue to utilise "exchcd == 1" because we are restricting the stock splits to NYSE-listed stocks since we continue replicating @Fama:1969wc. 
 
@@ -93,7 +93,7 @@ We now create the variable "nyse_dsf", which represents the daily stock file res
 
 Afterwards, the variable "split_return_data" is created, which contains day_rel_ex, which measures the number of days between the return and stock split.
 
-Given that @Fama:1969wc looked at the behaviour in returns of securities 12 months before and after the split, which was decided arbitrarily, we decided to look 365 days before and after the stock split in the variable "split_sample" to replicate @Fama:1969wc's approach best. 
+Given that @Fama:1969wc looked at the behaviour in returns of securities 12 months before and after the split, which was decided arbitrarily, we decided to look 365 days before and after the stock split in the variable "split_sample" to replicate the approach in @Fama:1969wc best. 
 
 We also attempt to count the number of splits in our sample. Our sample has 2305 splits, which is significantly more than the 940 stock splits within @Fama:1969wc. We suspect this may be due to the nature of exploring daily data instead of monthly data. Moreover, this change could be due to changes in the underlying data and market since the 1970s.
 ```{r nyse_dsf}
@@ -129,7 +129,7 @@ split_sample %>% count()
 ```
 We continue to focus on vwretd in our analysis and identify it within "index_returns", which stands for the value-weighted return, which involves distributions and weighs each stock within a given portfolio according to their market value when the portfolio is formed. 
 
-We also aim to partially address @Fama:1969wc's worries about non-zero excess returns, which can lead to errors in specification, leading to the initial paper excluding 15 months before the stock split. In our replication using daily data, we deemed this figure to be 450 days, scaled to approximately 15 months in days (15 months x 30 days).
+We also aim to partially address the worries from @Fama:1969wc about non-zero excess returns, which can lead to errors in specification, leading to the initial paper excluding 15 months before the stock split. In our replication using daily data, we deemed this figure to be 450 days, scaled to approximately 15 months in days (15 months x 30 days).
 ```{r}
 index_returns <-
   dsi %>%
@@ -175,7 +175,7 @@ table2_data <-
   mutate(day_gap = day_index - ex_day_index) %>%
   filter(abs(day_gap) <= 365)
 ```
-After calculating the abnormal returns according to @Fama:1969wc's approach, we can now extend the replication to a critical aspect of the @Fama:1969wc paper, which is essentially Figure 2b. However, a difference between the graph below and @Fama:1969wc's Figure 2b is that this figure outlines the relationship between the cumulative average residuals of all splits but primarily focuses on the announcement date instead of the effective month @Fama:1969wc. The x-axis is in terms of "days" in our replication which is more specific than @Fama:1969wc's month approach due to the lack of computational abilities at the time. 
+After calculating the abnormal returns according to the approach in @Fama:1969wc, we can now extend the replication to a critical aspect of the @Fama:1969wc paper, which is essentially Figure 2b. However, a difference between the graph below and Figure 2b in @Fama:1969wc is that this figure outlines the relationship between the cumulative average residuals of all splits but primarily focuses on the announcement date instead of the effective month @Fama:1969wc. The x-axis is in terms of "days" in our replication which is more specific than the month approach by @Fama:1969wc due to the lack of computational abilities at the time. 
 
 Nonetheless, regarding the figure itself, we continue to observe a similar pattern to the Figure 2b in @Fama:1969wc despite the different nature of the dates investigated and the more recent data surrounding stock returns and stock splits used. Specifically, there is an increase in the cumulative average residuals increases significantly leading up to the announcement date of the stock split. Still, this steep increase halts after the announcement date. 
 
