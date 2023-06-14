@@ -16,7 +16,11 @@ Regarding the pivotal theories at the time, @Fama:1969wc analysed several theori
 
 Specifically, Theory A represents the liquidity hypothesis, where firms tend to utilise stock splits to signal private information on the firm's positive outlook, and Theory B denotes the information signalling hypothesis, where firms attempt to improve the liquidity of their stocks via stock splits. After scrutinising recent literature, we discover these theories remain significant in explaining management's intentions surrounding stock splits. 
 
-The primary replication and dividend analyses below will explain these theories and their applicability to our replication of @Fama:1969wc.
+Given the above, we discussed alternative theories during our seminar. Notably, we believe that the following views that constitute extensions of Theories A and B are applicable in FFJR and our results obtained below. 
+
+**Theory A':** Firms like to keep their stock price within certain bounds. When the stock price rises above a certain threshold, a firm may initiate a split, announcing it several weeks in advance of its effective date. Firms do not use splits to signal private information about firm prospects. Pre-split stock prices may be driven by information suggesting an imminent dividend increase. 
+
+Again, the primary replication and dividend analyses below will explain these theories and their applicability to our replication of @Fama:1969wc.
 
 # Main replication of @Fama:1969wc
 
@@ -340,7 +344,7 @@ table2_w_divs %>%
   geom_point()
 ```
 
-And figure 3d from @Fama:1969wc.
+And Figure 3d from @Fama:1969wc.
 
 ```{r}
 table2_w_divs %>%
@@ -358,3 +362,13 @@ table2_w_divs %>%
   filter(!is.na(up_div)) %>%
   count(up_div)
 ```
+The previous table shows that 840419/1118186 = 75% of splits are followed by dividend "increases greater than those experienced at the same time by other securities in the market". It would be reasonable to say that today's market would also expect "dividend increases" after split announcements as that would be the "more likely scenario".
+
+In terms of theory alignment, although we were trying to distinguish theory A and theory B in our replication, it seemed like there were elements from both theories in the results. Pre-announcement returns and announcement date returns are positive but with a much smaller effect. Overall, the figure we saw in the main replication arguably is more consistent with theory A', with positive pre-announcement returns and almost no reaction to the split announcement. 
+
+When we turn to the dividend analysis part, we see that the market reacts (slightly) positively when stock splits are announced. For firms with "dividend increases", this (slightly) positive return will slowly flatten during the year afterwards. For firms with "dividend decreases", this (slightly) positive return will drop sharply after around 100 days. This is likely the time that the market realised that no "dividend increases" were happening. 
+
+Overall, the figures we saw are relatively similar to @Fama:1969wc's. One could argue that the market exhibits elements from both theories. An alternative theory could be:
+
+- Theory A": Firms like to keep their stock price within certain bounds. When the stock price rises above a certain threshold, a firm may initiate a split, announcing it several weeks in advance of its effective date. Firms also use splits to signal private information about future dividend increases, which may signal private information about firm prospects.
+
